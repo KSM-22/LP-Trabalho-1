@@ -1,14 +1,16 @@
 # LP_Trabalho_1
 
-Projeto 1 da disciplina de Laboratorio de Programação.<br>
+Projeto 1 da disciplina de Laboratório de Programação.<br>
 1º Semestre do curso
 de [Análise e Desenvolvimento de Sistemas](https://www.ufc.br/ensino/guia-de-profissoes/17805-analise-e-desenvolvimento-de-sistemas)
 
 Equipe: Jhefferson e Pablo.
 
 # Restrição técnica
-
-Não pode utilizar _imports_ ou bibliotecas.
+● Não pode fazer o uso de IMPORT, bibliotecas.<br>
+● Comentar o código para melhor compreensão e avaliação.<br>
+● Nome das funções que registram o que a função está fazendo.<br>
+● Um único arquivo ```.py```
 
 # Enunciado
 
