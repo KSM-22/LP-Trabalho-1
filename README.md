@@ -1,6 +1,6 @@
 # LP_Trabalho_1
 
-Projeto 1 da disciplina de Laboratorio de Programação.<br>
+Projeto 1 da disciplina de Laboratório de Programação.<br>
 1º Semestre do curso
 de [Análise e Desenvolvimento de Sistemas](https://www.ufc.br/ensino/guia-de-profissoes/17805-analise-e-desenvolvimento-de-sistemas)
 
