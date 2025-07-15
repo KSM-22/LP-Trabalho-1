@@ -1,5 +1,8 @@
+from datetime import datetime
+
 # BANCO_DADOS = []
 # TODO: match case no id
+HISTORICO_VENDAS = []
 BANCO_DADOS = [
     {'id': 'ABC-123', 'nome': 'Arroz Integral', 'preco': 15.99, 'quantidade': 50, 'categoria': 'Alimentos'},
     {'id': 'DEF-456', 'nome': 'Detergente Multiuso', 'preco': 8.50, 'quantidade': 30, 'categoria': 'Limpeza'},
@@ -19,7 +22,6 @@ def _buscar_produto(chave, tipo='id'):
         if produto[tipo] == chave:
             return produto
     return None
-
 
 def _verificar_id(id):
     id_parts = id.strip().split('-')
@@ -41,7 +43,6 @@ def _verificar_id(id):
         return False
     return True
 
-
 #
 #   Espaço reservado para funções principais
 #   Essas funções são as que interagem com o usúario e por intermédio de funções internas e manipulação do BANCO_DADOS
@@ -53,7 +54,6 @@ def esta_cadastrado(produto_id):
             return True
     return False
 
-
 def cadastrar_produto():
     global id
     global nome
@@ -62,7 +62,7 @@ def cadastrar_produto():
     global categoria
 
     while True:
-        id = input('Digite o id do produto (Ex. ABC-123): ')
+        id = input('Digite o id do produto (Ex. ABC-123): ').upper()
         if not _verificar_id(id):
             continue
         if esta_cadastrado(id):
@@ -116,12 +116,118 @@ def cadastrar_produto():
     else:
         print('Produto já existe no banco de dados.')
 
+def remover_produto():
+    print('—' * 20 + f'{'REMOVER PRODUTO':^21}' + '—' * 19)
+    id = input('Digite o ID do produto: ').upper()
+    if not _verificar_id(id):
+        return
+
+    produto = _buscar_produto(id)
+    if not produto:
+        print('Produto não encontrado.')
+        return
+
+    if produto['quantidade'] == 0:
+        print('Não é possível remover um produto sem estoque.')
+        return
+
+    print(f"\nVocê realmente deseja remover {produto['nome']}? (S/N)")
+    confirmacao = input().upper()
+
+    if confirmacao == 'S':
+        BANCO_DADOS.remove(produto)
+        print('Produto removido com sucesso!')
+    else:
+        print('Operação cancelada.')
+
+def listar_produto():
+    estoque_baixo = 15
+    print('—' * 20 + f'{'LISTAR PRODUTOS':^21}' + '—' * 19 +
+    """
+    1. Listar todos os produtos
+    2. Filtrar por nome
+    3. Filtrar por ID 
+    4. Filtrar por categoria
+    5. Mostrar produtos com estoque baixo
+    6. Ordenar produtos por nome
+    7. Ordenar produtos por preço
+    8. Ordenar produtos por estoque
+    """)
+
+    try:
+        opcao = int(input('Digite sua opção: ').strip())
+        produtos = BANCO_DADOS.copy()
+
+        if opcao == 1:
+            pass  # Lista todos
+        elif opcao == 2:
+            nome = input('Digite o nome para filtrar: ').strip()
+            produtos = [p for p in produtos if nome.lower() in p['nome'].lower()]
+        elif opcao == 3:
+            id = input('Digite o ID para filtrar: ').upper()
+            produtos = [p for p in produtos if id in p['id']]
+        elif opcao == 4:
+            print('\nCategorias disponíveis:')
+            for i, cat in enumerate(categorias_validas, 1):
+                print(f'{i}. {cat}')
+            cat_num = int(input('\nEscolha o número da categoria: '))
+            if 1 <= cat_num <= len(categorias_validas):
+                cat = categorias_validas[cat_num - 1]
+                produtos = [p for p in produtos if p['categoria'] == cat]
+        elif opcao == 5:
+            produtos = [p for p in produtos if p['quantidade'] < estoque_baixo]
+        elif opcao in [6, 7, 8]:
+            try:
+                print('—' * 21 + f'{'ORDENAR POR:':^18}' + '—' * 21 +
+    '''
+    1. Crescente
+    2. Decrescente
+    '''
+                     )
+                ordem = int(input("Digite sua opção: ").strip())
+
+                if ordem not in [1, 2]:
+                    print("Opção de ordenação inválida!")
+                    return
+
+                reverse = ordem == 2
+                if opcao == 6:
+                    produtos.sort(key=lambda x: x['nome'], reverse=reverse)
+                elif opcao == 7:
+                    produtos.sort(key=lambda x: x['preco'], reverse=reverse)
+                else:  # opcao == 8
+                    produtos.sort(key=lambda x: x['quantidade'], reverse=reverse)
+            except ValueError:
+                print("Digite uma opção válida!")
+                return
+        else:
+            print('Opção inválida!')
+            return
+
+        if not produtos:
+            print('Nenhum produto encontrado!')
+            return
+
+        for produto in produtos:
+            header = ('—' * 16 + f'{'INFORMAÇÕES DO PRODUTO':^28}' + '—' * 16)
+            print(f"""
+    {header}
+    Identificador Unico(ID): {produto['id']}
+    Nome: {produto['nome']}
+    Preço: R$ {produto['preco']}
+    Quantidade em Estoque: {produto['quantidade']}
+    Categoria: {produto['categoria']}\n""")
+
+    except ValueError:
+        print('Digite uma opção válida!')
 
 def buscar_produto():
-    print("""=== MENU - BUSCAR PRODUTO ===
+    print('—' * 20 + f'{'BUSCAR PRODUTO':^20}' + '—' * 20 +
+    """
     1. Buscar por ID
     2. Buscar por nome
-    3. Buscar por categoria""")
+    3. Buscar por categoria
+    """)
     opcao_escolhida_busca = int(input('Digite sua opção:').strip())
     while opcao_escolhida_busca not in range(1, 4):
         print('Opção inválida.')
@@ -146,12 +252,14 @@ def buscar_produto():
             return
         produtos = [produto]
     elif opcao_escolhida_busca == 3:
-        print("""=== Categorias disponiveis ===
+        print('—' * 16 + f'{'CATEGORIAS DISPONÍVEIS':^28}' + '—' * 16 +
+    """
     1. Alimentos
     2. Limpeza
     3. Eletrônicos
-    4. Vestuário""")
+    4. Vestuário\n""")
         categoria_escolhida = int(input('Digite a categoria do produto: ').strip())
+        print('')
         while not categoria_escolhida in range(1, 5):
             print('Categoria inválida.')
             categoria_escolhida = int(input('Digite a categoria do produto: ').strip())
@@ -170,46 +278,162 @@ def buscar_produto():
             return
 
     for produto in produtos:
-        header = f"{'-' * 10} Informações do Produto {'-' * 10}"
+        header = ('—' * 16 + f'{'INFORMAÇÕES DO PRODUTO':^28}' + '—' * 16)
         print(f"""{header}
     Identificador Unico(ID): {produto['id']}
     Nome: {produto['nome']}
     Preço: R$ {produto['preco']}
     Quantidade em Estoque: {produto['quantidade']}
-    Categoria: {produto['categoria']}
-{'-' * len(header)}""")
+    Categoria: {produto['categoria']}\n""")
+
+def vender_produto():
+    print('—' * 20 + f'{'VENDER PRODUTO':^20}' + '—' * 20)
+
+    vendas_atuais = []
+    valor_total_vendas = 0
+    data_venda = datetime.now()
+
+    while True:
+        id = input('Digite o ID do produto: ').upper()
+        if not _verificar_id(id):
+            continue
+
+        produto = _buscar_produto(id)
+        if not produto:
+            print('Produto não encontrado.')
+            continue
+
+        try:
+            quantidade = int(input('Digite a quantidade desejada: '))
+            if quantidade <= 0:
+                print('Quantidade inválida, digite um valor positivo.')
+                continue
+        except ValueError:
+            print('Digite um número válido.')
+            continue
+
+        if quantidade > produto['quantidade']:
+            print(f"Estoque insuficiente. Disponível: {produto['quantidade']}")
+            continue
+
+        total = produto['preco'] * quantidade
+
+        print(f"\nConfirmar venda de {quantidade} unidade(s) de {produto['nome']}?")
+        print(f"Valor total: R$ {total:.2f}")
+        confirmacao = input("Digite S para confirmar: ").upper()
+
+        if confirmacao != 'S':
+            print('Venda cancelada.')
+            continue
+
+        produto['quantidade'] -= quantidade
+        valor_total_vendas += total
+
+        venda = {
+            'data': data_venda,
+            'produto': produto['nome'],
+            'quantidade': quantidade,
+            'valor_unitario': produto['preco'],
+            'valor_total': total
+        }
+
+        HISTORICO_VENDAS.append(venda)
+        vendas_atuais.append(venda)
+
+        continuar = input("\nDeseja vender mais produtos? (S/N): ").upper()
+        if continuar != 'S':
+            break
+
+    if vendas_atuais:
+        print('\n' + '—' * 24 + f'{'RECIBO':^12}' + '—' * 24)
+        print(f"Data: {data_venda.strftime('%d/%m/%Y %H:%M:%S')}")
+        print('—' * 60)
+        print(f"{'Produto':<25} {'Qtd':>5} {'Valor Unit.':>12} {'Total':>12}")
+        print('—' * 60)
+
+        for venda in vendas_atuais:
+            print(
+                f"{venda['produto']:<25} {venda['quantidade']:>5} {venda['valor_unitario']:>12.2f} {venda['valor_total']:>12.2f}")
+
+        print('—' * 60)
+        print(f"Total de itens vendidos: {len(vendas_atuais)}")
+        print(f"Valor total da venda: R$ {valor_total_vendas:.2f}")
+
+def aplicar_desconto():
+    print('—' * 20 + f'{'APLICAR DESCONTO':^20}' + '—' * 20)
+    print('\nCategorias disponíveis:')
+    for i, cat in enumerate(categorias_validas, 1):
+        print(f'{i}. {cat}')
+
+    try:
+        cat_num = int(input('\nEscolha o número da categoria: '))
+        if not 1 <= cat_num <= len(categorias_validas):
+            print('Categoria inválida!')
+            return
+
+        percentual = float(input('Digite o percentual de desconto (1-100): '))
+        if not 0 < percentual <= 100:
+            print('Percentual inválido!')
+            return
+
+        categoria = categorias_validas[cat_num - 1]
+        produtos_categoria = [p for p in BANCO_DADOS if p['categoria'] == categoria]
+
+        if not produtos_categoria:
+            print(f'Nenhum produto encontrado na categoria {categoria}')
+            return
+
+        for produto in produtos_categoria:
+            desconto = produto['preco'] * (percentual / 100)
+            preco_com_desconto = produto['preco'] - desconto
+
+            print(f"\n{produto['nome']}:")
+            print(f"Preço original: R$ {produto['preco']:.2f}")
+            print(f"Com desconto ({percentual}%): R$ {preco_com_desconto:.2f}")
+
+            confirmacao = input('\nAplicar desconto? (S/N): ').upper()
+            if confirmacao == 'S':
+                produto['preco'] = preco_com_desconto
+                print('Desconto aplicado com sucesso!')
+            else:
+                print('Desconto não aplicado.')
+
+    except ValueError:
+        print('Digite valores numéricos válidos!')
 
 
 # Área de execução, é aqui que o Python vai executar o codigo principal para saber qual função chamar.
+
 while True:
-    print("""
-    === MENU PRINCIPAL ===
+    print('—' * 20 + f'{'MENU PRINCIPAL':^20}' + '—' * 20 +
+    '''
     1. Cadastrar produto [FEITO]
     2. Atualizar produto
-    3. Remover produto
-    4. Listar produtos (ordenar por: nome/preço/estoque)
-    5. Buscar produto [FEITO
+    3. Remover produto [FEITO]
+    4. Listar produtos [FEITO]
+    5. Buscar produto [FEITO]
     6. Relatórios (Valor total/Estoque baixo)
-    7. Vender produto
-    8. Aplicar desconto
-    0. Sair""")
+    7. Vender produto [FEITO]
+    8. Aplicar desconto [FEITO]
+    0. Sair
+    ''')
     opcao_escolhida = int(input('Digite sua opção: '))
     if opcao_escolhida == 1:
         cadastrar_produto()
     elif opcao_escolhida == 2:
         pass
     elif opcao_escolhida == 3:
-        pass
+        remover_produto()
     elif opcao_escolhida == 4:
-        pass
+        listar_produto()
     elif opcao_escolhida == 5:
         buscar_produto()
     elif opcao_escolhida == 6:
         pass
     elif opcao_escolhida == 7:
-        pass
+        vender_produto()
     elif opcao_escolhida == 8:
-        pass
+        aplicar_desconto()
     elif opcao_escolhida == 0:
         print('Desligando o sistema...')
         break
