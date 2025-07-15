@@ -1,5 +1,5 @@
 # BANCO_DADOS = []
-
+# TODO: match case no id
 BANCO_DADOS = [
     {'id': 'ABC-123', 'nome': 'Arroz Integral', 'preco': 15.99, 'quantidade': 50, 'categoria': 'Alimentos'},
     {'id': 'DEF-456', 'nome': 'Detergente Multiuso', 'preco': 8.50, 'quantidade': 30, 'categoria': 'Limpeza'},
@@ -67,6 +67,7 @@ def cadastrar_produto():
             continue
         if esta_cadastrado(id):
             print('Esse ID já está cadastrado, escolha outro.')
+            continue
         # Se chegar aqui significa que todas as condições estão corretas e pode ir para o proximo laço (while).
         break
 
@@ -132,7 +133,7 @@ def buscar_produto():
         while not _verificar_id(id):
             id = str(input('Digite o ID do produto: '))
         produto = _buscar_produto(id)
-        if not produtos:
+        if not produto:
             print('Não há nenhum produto com esse ID.')
             return
         produtos = [produto]
