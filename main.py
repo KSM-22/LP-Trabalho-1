@@ -244,7 +244,6 @@ def buscar_produto():
             return
         produtos = [produto]
     elif opcao_escolhida_busca == 2:
-        # TODO: Questionar se produtos podem ter o mesmo nome.
         nome = input('Digite o nome do produto: ').strip()
         produto = _buscar_produto(nome, tipo='nome')
         if not produto:
