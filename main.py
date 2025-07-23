@@ -116,6 +116,79 @@ def cadastrar_produto():
     else:
         print('Produto já existe no banco de dados.')
 
+
+def atualizar_produto():
+    print('—' * 20 + f'{'ATUALIZAR PRODUTO':^21}' + '—' * 19)
+    id_local = input('Digite o ID do produto: ').upper()
+    if not _verificar_id(id_local):
+        return
+
+    produto = _buscar_produto(id_local)
+    if not produto:
+        print('Produto não encontrado.')
+        return
+
+    print(f"""
+Identificador Unico(ID): {produto['id']}
+Nome: {produto['nome']}
+Preço: R$ {produto['preco']}
+Quantidade em Estoque: {produto['quantidade']}
+Categoria: {produto['categoria']}""")
+    print("""
+    1. Atualizar preço
+    2. Atualizar nome
+    3. Atualizar quantidade
+    """)
+
+    try:
+        opcao = int(input('Digite sua opção: ').strip())
+        if opcao == 1:
+            try:
+                novo_preco = float(input('Digite o novo preço: R$ '))
+                if novo_preco > 0:
+                    produto['preco'] = novo_preco
+                    print('Preço atualizado com sucesso!')
+                else:
+                    print('Preço inválido. Digite um valor positivo.')
+            except ValueError:
+                print('Digite um valor numérico válido.')
+
+        elif opcao == 2:
+            novo_nome = input('Digite o novo nome: ').strip()
+            if novo_nome.replace(' ', '').isalnum():
+                produto['nome'] = novo_nome
+                print('Nome atualizado com sucesso!')
+            else:
+                print('Nome inválido, use apenas letras, números e espaços.')
+
+        elif opcao == 3:
+            try:
+                ajuste = input('Digite a quantidade (use + ou - para ajustar) Ex. +10: ')
+                if ajuste.startswith('+'):
+                    quantidade = int(ajuste[1:])
+                    produto['quantidade'] += quantidade
+                    print(f'Adicionadas {quantidade} unidades ao estoque.')
+                elif ajuste.startswith('-'):
+                    quantidade = int(ajuste[1:])
+                    if produto['quantidade'] >= quantidade:
+                        produto['quantidade'] -= quantidade
+                        print(f'Removidas {quantidade} unidades do estoque.')
+                        if produto['quantidade'] == 0:
+                            print('ALERTA: Estoque esgotado!')
+                    else:
+                        print('Quantidade insuficiente em estoque.')
+                else:
+                    print('Use + ou - para ajustar a quantidade.')
+            except ValueError:
+                print('Digite um número válido.')
+        else:
+            print('Opção inválida.')
+    except ValueError:
+        print('Digite uma opção válida.')
+
+
+
+
 def remover_produto():
     print('—' * 20 + f'{'REMOVER PRODUTO':^21}' + '—' * 19)
     id = input('Digite o ID do produto: ').upper()
@@ -358,6 +431,29 @@ def vender_produto():
         print(f"Total de itens vendidos: {len(vendas_atuais)}")
         print(f"Valor total da venda: R$ {valor_total_vendas:.2f}")
 
+
+def gerar_relatorios():
+    print('—' * 20 + f'{'RELATÓRIOS':^20}' + '—' * 20)
+
+    # Calcula e exibe valor total em estoque
+    valor_total = sum(p['preco'] * p['quantidade'] for p in BANCO_DADOS)
+    print(f'\nValor total em estoque: R$ {valor_total:.2f}')
+
+    # Verifica e exibe produtos com estoque baixo
+    estoque_baixo = 15
+    produtos_baixo = [p for p in BANCO_DADOS if p['quantidade'] < estoque_baixo]
+
+    print(f'\nProdutos com estoque baixo(Abaixo de {estoque_baixo} unidades):')
+    if not produtos_baixo:
+        print('Não há produtos com estoque baixo.')
+    else:
+        for produto in produtos_baixo:
+            print(f"""
+    Nome: {produto['nome']}
+    Quantidade atual: {produto['quantidade']}
+    Categoria: {produto['categoria']}""")
+
+
 def aplicar_desconto():
     print('—' * 20 + f'{'APLICAR DESCONTO':^20}' + '—' * 20)
     print('\nCategorias disponíveis:')
@@ -406,21 +502,21 @@ def aplicar_desconto():
 while True:
     print('—' * 20 + f'{'MENU PRINCIPAL':^20}' + '—' * 20 +
     '''
-    1. Cadastrar produto [FEITO]
+    1. Cadastrar produto
     2. Atualizar produto
-    3. Remover produto [FEITO]
-    4. Listar produtos [FEITO]
-    5. Buscar produto [FEITO]
+    3. Remover produto
+    4. Listar produtos
+    5. Buscar produto
     6. Relatórios (Valor total/Estoque baixo)
-    7. Vender produto [FEITO]
-    8. Aplicar desconto [FEITO]
+    7. Vender produto
+    8. Aplicar desconto
     0. Sair
     ''')
     opcao_escolhida = int(input('Digite sua opção: '))
     if opcao_escolhida == 1:
         cadastrar_produto()
     elif opcao_escolhida == 2:
-        pass
+        atualizar_produto()
     elif opcao_escolhida == 3:
         remover_produto()
     elif opcao_escolhida == 4:
@@ -428,7 +524,7 @@ while True:
     elif opcao_escolhida == 5:
         buscar_produto()
     elif opcao_escolhida == 6:
-        pass
+        gerar_relatorios()
     elif opcao_escolhida == 7:
         vender_produto()
     elif opcao_escolhida == 8:
